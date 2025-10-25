@@ -27,25 +27,34 @@ export class App {
   }
 
   private bindEvents() {
+    // Reshape the canvas when window resizes
     window.addEventListener("resize", () => this.resize());
 
+    // Create the brush and tool ti[]
     this.brushCanvas.addEventListener("mouseenter", (event) =>
       this.onEnter(event)
     );
 
+    // Removes brush when leaving canvas
     this.brushCanvas.addEventListener("mouseleave", () => this.onLeave());
 
+    // Update tooltip and mouse coordinates
     this.brushCanvas.addEventListener("mousemove", (event) =>
       this.onMove(event)
     );
 
-    this.brushSizeSlider.addEventListener("change", (event) => {
-      const { value } = event.target as HTMLInputElement;
-      if (this.brush) {
-        this.brush.size = Number(value);
-      }
-    });
+    // Handles changing size of brush
+    this.brushSizeSlider.addEventListener("change", (event) =>
+      this.onBrushSizeChange(event)
+    );
   }
+
+  private onBrushSizeChange = (event: Event) => {
+    const { value } = event.target as HTMLInputElement;
+    if (this.brush) {
+      this.brush.size = Number(value);
+    }
+  };
 
   public animate = () => {
     this.brushContext.clearRect(
@@ -82,7 +91,7 @@ export class App {
     this.brush = new Brush(this.brushContext, {
       x,
       y,
-      size: this.brushSizeSlider.value,
+      size: Number(this.brushSizeSlider.value),
     });
 
     if (this.showToolTip) {
