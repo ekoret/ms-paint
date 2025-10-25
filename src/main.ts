@@ -6,8 +6,12 @@ import { Tooltip } from "./Tooltip";
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 let mouseToolTipEnabled = true;
-let brush;
+let brush: Brush | null;
 let mouseToolTip: Tooltip | null = null;
+let mousePos = {
+  x: 0,
+  y: 0,
+};
 
 const brushCanvas: HTMLCanvasElement | null =
   document.querySelector("#brush-canvas");
@@ -26,7 +30,7 @@ if (!brushCtx) throw new Error("Missing brush context");
 brushCanvas.addEventListener("mouseenter", (event) => {
   const { x, y } = event;
   console.log("Brush Equipped");
-  brush = new Brush({ x, y, size: 50 });
+  brush = new Brush(brushCtx, { x, y, size: 50 });
 
   if (mouseToolTipEnabled) {
     mouseToolTip = new Tooltip(x, y);
@@ -43,10 +47,16 @@ brushCanvas.addEventListener("mouseleave", () => {
 brushCanvas.addEventListener("mousemove", (event) => {
   const { x, y } = event;
 
+  mousePos.x = x;
+  mousePos.y = y;
+
   mouseToolTip?.update(x, y);
 });
 
 const animate = () => {
+  brush?.update(mousePos.x, mousePos.y);
+  brush?.draw();
+
   requestAnimationFrame(animate);
 };
 
