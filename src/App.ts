@@ -6,6 +6,8 @@ export class App {
   private brushCanvas: HTMLCanvasElement;
   private brushContext: CanvasRenderingContext2D;
 
+  private brushSizeSlider: HTMLInputElement;
+
   private brush: Brush | null = null;
   private tooltip: Tooltip | null = null;
   private showToolTip: boolean = true;
@@ -17,6 +19,8 @@ export class App {
   constructor(brushSelector: string) {
     this.brushCanvas = this.getCanvas(brushSelector);
     this.brushContext = this.getContext(this.brushCanvas);
+
+    this.brushSizeSlider = DOMHelper.getEl<HTMLInputElement>("#brush-size");
 
     this.resize();
     this.bindEvents();
@@ -34,6 +38,13 @@ export class App {
     this.brushCanvas.addEventListener("mousemove", (event) =>
       this.onMove(event)
     );
+
+    this.brushSizeSlider.addEventListener("change", (event) => {
+      const { value } = event.target as HTMLInputElement;
+      if (this.brush) {
+        this.brush.size = Number(value);
+      }
+    });
   }
 
   public animate = () => {
@@ -68,7 +79,11 @@ export class App {
     console.log("Brush Equipped");
     const { x, y } = event;
 
-    this.brush = new Brush(this.brushContext, { x, y, size: 50 });
+    this.brush = new Brush(this.brushContext, {
+      x,
+      y,
+      size: this.brushSizeSlider.value,
+    });
 
     if (this.showToolTip) {
       this.tooltip = new Tooltip(x, y);
