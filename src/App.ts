@@ -7,10 +7,11 @@ export class App {
   private brushContext: CanvasRenderingContext2D;
 
   private brushSizeSlider: HTMLInputElement;
+  private hideTooltipButton: HTMLButtonElement;
 
   private brush: Brush | null = null;
   private tooltip: Tooltip | null = null;
-  private showToolTip: boolean = true;
+  private showTooltip: boolean = true;
   private mouse = {
     x: 0,
     y: 0,
@@ -21,6 +22,8 @@ export class App {
     this.brushContext = this.getContext(this.brushCanvas);
 
     this.brushSizeSlider = DOMHelper.getEl<HTMLInputElement>("#brush-size");
+    this.hideTooltipButton =
+      DOMHelper.getEl<HTMLButtonElement>("#toggle-tooltip");
 
     this.resize();
     this.bindEvents();
@@ -47,7 +50,18 @@ export class App {
     this.brushSizeSlider.addEventListener("change", (event) =>
       this.onBrushSizeChange(event)
     );
+
+    this.hideTooltipButton.addEventListener("click", () =>
+      this.toggleTooltip()
+    );
   }
+
+  private toggleTooltip = () => {
+    this.showTooltip = !this.showTooltip;
+    this.hideTooltipButton.textContent = `${
+      this.showTooltip ? "Hide" : "Show"
+    } Tooltip`;
+  };
 
   private onBrushSizeChange = (event: Event) => {
     const { value } = event.target as HTMLInputElement;
@@ -94,7 +108,7 @@ export class App {
       size: Number(this.brushSizeSlider.value),
     });
 
-    if (this.showToolTip) {
+    if (this.showTooltip) {
       this.tooltip = new Tooltip(x, y, this.brush);
       this.tooltip?.attach();
     }
