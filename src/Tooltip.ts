@@ -32,7 +32,7 @@ export class Tooltip {
     this.x = x;
     this.y = y;
     this.element.style.top = `${this.y}px`;
-    this.element.style.left = `${this.x + this.brush.size}px`;
+    this.element.style.left = `${this.x + this.brush.size + 10}px`;
     this.element.innerHTML = `x:${this.x}, y:${this.y}<br>brush_size: ${this.brush.size}`;
   }
 
