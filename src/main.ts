@@ -53,11 +53,13 @@ brushCanvas.addEventListener("mousemove", (event) => {
   mouseToolTip?.update(x, y);
 });
 
-const animate = () => {
+const animateBrush = () => {
+  brushCtx.clearRect(0, 0, brushCanvas.width, brushCanvas.height);
+
   brush?.update(mousePos.x, mousePos.y);
   brush?.draw();
 
-  requestAnimationFrame(animate);
+  requestAnimationFrame(animateBrush);
 };
 
-animate();
+animateBrush();
