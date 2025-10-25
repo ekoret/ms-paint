@@ -1,27 +1,57 @@
-import { DOMHelper } from "./DOMHelper";
+import { Brush } from "./Brush";
 import "./style.css";
+import { Tooltip } from "./Tooltip";
 
-const dom = new DOMHelper();
+// Init
+const WIDTH = window.innerWidth;
+const HEIGHT = window.innerHeight;
+let mouseToolTipEnabled = true;
+let brush;
+const mousePos = {
+  x: 0,
+  y: 0,
+};
+let mouseToolTip: Tooltip | null = null;
 
-const drawCanvas = dom.getEl<HTMLCanvasElement>("#draw-canvas");
-if (!drawCanvas) throw new Error("Missing draw canvas");
+const brushCanvas: HTMLCanvasElement | null =
+  document.querySelector("#brush-canvas");
 
-const drawCtx = drawCanvas.getContext("2d");
-if (!drawCtx) throw new Error("Missing draw context");
+if (!brushCanvas) throw new Error("Missing brush canvas");
 
-drawCanvas.width = window.innerWidth;
-drawCanvas.height = window.innerHeight;
+// Brush Canvas Settings
+brushCanvas.width = WIDTH;
+brushCanvas.height = HEIGHT;
 
-drawCanvas.addEventListener("resize", () => {
-  drawCanvas.width = window.innerWidth;
-  drawCanvas.height = window.innerHeight;
+const brushCtx = brushCanvas.getContext("2d");
+
+if (!brushCtx) throw new Error("Missing brush context");
+
+// Equipping and unequipping brush
+brushCanvas.addEventListener("mouseenter", () => {
+  console.log("Brush Equipped");
+  brush = new Brush({ ...mousePos, size: 50 });
+
+  if (mouseToolTipEnabled) {
+    mouseToolTip = new Tooltip(mousePos.x, mousePos.y);
+    mouseToolTip.attach(document.body);
+  }
+});
+brushCanvas.addEventListener("mouseleave", () => {
+  console.log("Brush Unequipped");
+  brush = null;
+
+  Tooltip.removeAll();
+});
+
+brushCanvas.addEventListener("mousemove", (event) => {
+  const { x, y } = event;
+  mousePos.x = x;
+  mousePos.y = y;
+
+  mouseToolTip?.update(x, y);
 });
 
 const animate = () => {
-  // Background
-  drawCtx.fillStyle = "#111";
-  drawCtx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
-
   requestAnimationFrame(animate);
 };
 
