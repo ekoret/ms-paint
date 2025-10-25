@@ -7,10 +7,6 @@ const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 let mouseToolTipEnabled = true;
 let brush;
-const mousePos = {
-  x: 0,
-  y: 0,
-};
 let mouseToolTip: Tooltip | null = null;
 
 const brushCanvas: HTMLCanvasElement | null =
@@ -27,12 +23,13 @@ const brushCtx = brushCanvas.getContext("2d");
 if (!brushCtx) throw new Error("Missing brush context");
 
 // Equipping and unequipping brush
-brushCanvas.addEventListener("mouseenter", () => {
+brushCanvas.addEventListener("mouseenter", (event) => {
+  const { x, y } = event;
   console.log("Brush Equipped");
-  brush = new Brush({ ...mousePos, size: 50 });
+  brush = new Brush({ x, y, size: 50 });
 
   if (mouseToolTipEnabled) {
-    mouseToolTip = new Tooltip(mousePos.x, mousePos.y);
+    mouseToolTip = new Tooltip(x, y);
     mouseToolTip.attach(document.body);
   }
 });
@@ -45,8 +42,6 @@ brushCanvas.addEventListener("mouseleave", () => {
 
 brushCanvas.addEventListener("mousemove", (event) => {
   const { x, y } = event;
-  mousePos.x = x;
-  mousePos.y = y;
 
   mouseToolTip?.update(x, y);
 });
