@@ -95,7 +95,7 @@ export class App {
     });
 
     if (this.showToolTip) {
-      this.tooltip = new Tooltip(x, y);
+      this.tooltip = new Tooltip(x, y, this.brush);
       this.tooltip?.attach();
     }
   }
