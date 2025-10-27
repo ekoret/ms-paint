@@ -6,8 +6,13 @@ export class App {
   private brushCanvas: HTMLCanvasElement;
   private brushContext: CanvasRenderingContext2D;
 
+  private drawCanvas: HTMLCanvasElement;
+  private drawContext: CanvasRenderingContext2D;
+
   private brushSizeSlider: HTMLInputElement;
   private hideTooltipButton: HTMLButtonElement;
+
+  private canvasWrapper: HTMLDivElement;
 
   private brush: Brush | null = null;
   private tooltip: Tooltip | null = null;
@@ -17,9 +22,14 @@ export class App {
     y: 0,
   };
 
-  constructor(brushSelector: string) {
+  constructor(brushSelector: string, drawSelector: string) {
     this.brushCanvas = this.getCanvas(brushSelector);
     this.brushContext = this.getContext(this.brushCanvas);
+
+    this.drawCanvas = this.getCanvas(drawSelector);
+    this.drawContext = this.getContext(this.drawCanvas);
+
+    this.canvasWrapper = DOMHelper.getEl<HTMLDivElement>(".canvas-wrapper");
 
     this.brushSizeSlider = DOMHelper.getEl<HTMLInputElement>("#brush-size");
     this.hideTooltipButton =
@@ -33,16 +43,16 @@ export class App {
     // Reshape the canvas when window resizes
     window.addEventListener("resize", () => this.resize());
 
-    // Create the brush and tool ti[]
-    this.brushCanvas.addEventListener("mouseenter", (event) =>
+    // Create the brush and tool tip
+    this.canvasWrapper.addEventListener("mouseenter", (event) =>
       this.onEnter(event)
     );
 
     // Removes brush when leaving canvas
-    this.brushCanvas.addEventListener("mouseleave", () => this.onLeave());
+    this.canvasWrapper.addEventListener("mouseleave", () => this.onLeave());
 
     // Update tooltip and mouse coordinates
-    this.brushCanvas.addEventListener("mousemove", (event) =>
+    this.canvasWrapper.addEventListener("mousemove", (event) =>
       this.onMove(event)
     );
 
@@ -54,6 +64,14 @@ export class App {
     this.hideTooltipButton.addEventListener("click", () =>
       this.toggleTooltip()
     );
+
+    // Handle changing brush state when holding
+    this.canvasWrapper.addEventListener("mousedown", () => {
+      this.brush?.setIsPressed(true);
+    });
+    this.canvasWrapper.addEventListener("mouseup", () => {
+      this.brush?.setIsPressed(false);
+    });
   }
 
   private toggleTooltip = () => {
@@ -71,17 +89,29 @@ export class App {
   };
 
   public animate = () => {
-    this.brushContext.clearRect(
-      0,
-      0,
-      this.brushCanvas.width,
-      this.brushCanvas.height
-    );
+    this.clearCanvas(this.brushContext);
 
     this.brush?.update(this.mouse.x, this.mouse.y);
     this.brush?.draw();
 
     requestAnimationFrame(this.animate);
+  };
+
+  public animateDraw = () => {
+    if (this.brush?.isPressed) {
+      this.drawContext.beginPath();
+      this.drawContext.arc(
+        this.brush!.x,
+        this.brush!.y,
+        this.brush!.size,
+        0,
+        Math.PI * 2
+      );
+      this.drawContext.closePath();
+      this.drawContext.fillStyle = this.brush!.color;
+      this.drawContext.fill();
+    }
+    requestAnimationFrame(this.animateDraw);
   };
 
   private onMove(event: MouseEvent) {
@@ -102,6 +132,13 @@ export class App {
     console.log("Brush Equipped");
     const { x, y } = event;
 
+    /**
+     * TODO: bug
+     * keep mouse in canvas, refresh page,
+     * dont move mouse.
+     * the brush spawns at 0,0, when it should
+     * be where the mouse is.
+     */
     this.brush = new Brush(this.brushContext, {
       x,
       y,
@@ -120,6 +157,9 @@ export class App {
 
     this.brushCanvas.width = width;
     this.brushCanvas.height = height;
+
+    this.drawCanvas.width = width;
+    this.drawCanvas.height = height;
   }
 
   private getContext(canvas: HTMLCanvasElement) {
@@ -132,5 +172,9 @@ export class App {
     const el = DOMHelper.getEl<HTMLCanvasElement>(selector);
     if (!el) throw new Error(`Missing canvas: ${selector}`);
     return el;
+  }
+
+  private clearCanvas(context: CanvasRenderingContext2D) {
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   }
 }
