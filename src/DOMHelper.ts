@@ -4,4 +4,11 @@ export class DOMHelper {
     if (!el) throw new Error(`Could not get element: ${selector}`);
     return el;
   }
+
+  public static createSwatch(color: string) {
+    const swatch = document.createElement("div");
+    swatch.classList.add("swatch");
+    swatch.style.backgroundColor = color;
+    return swatch;
+  }
 }

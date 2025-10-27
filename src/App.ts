@@ -12,6 +12,7 @@ export class App {
   private brushSizeSlider: HTMLInputElement;
   private hideTooltipButton: HTMLButtonElement;
   private clearButton: HTMLButtonElement;
+  private swatches: HTMLDivElement;
 
   private canvasWrapper: HTMLDivElement;
 
@@ -22,6 +23,7 @@ export class App {
     x: 0,
     y: 0,
   };
+  private selectedColor: string = "";
 
   constructor(brushSelector: string, drawSelector: string) {
     this.brushCanvas = this.getCanvas(brushSelector);
@@ -32,11 +34,13 @@ export class App {
 
     this.canvasWrapper = DOMHelper.getEl<HTMLDivElement>(".canvas-wrapper");
 
+    this.swatches = DOMHelper.getEl<HTMLDivElement>("#swatches");
     this.clearButton = DOMHelper.getEl<HTMLButtonElement>("#clear");
     this.brushSizeSlider = DOMHelper.getEl<HTMLInputElement>("#brush-size");
     this.hideTooltipButton =
       DOMHelper.getEl<HTMLButtonElement>("#toggle-tooltip");
 
+    this.initSwatches();
     this.resize();
     this.bindEvents();
   }
@@ -79,7 +83,24 @@ export class App {
     this.clearButton.addEventListener("click", () =>
       this.clearCanvas(this.drawContext)
     );
+
+    // Handle clicking swatches
+    this.swatches.addEventListener("click", (event) =>
+      this.onSwatchClick(event)
+    );
   }
+
+  private onSwatchClick = (event: PointerEvent) => {
+    const swatch = event.target as HTMLDivElement;
+
+    if (!swatch.classList.contains("swatch")) return;
+
+    Array.from(this.swatches.children).forEach((child) =>
+      child.classList.remove("selected")
+    );
+    swatch.classList.add("selected");
+    this.selectedColor = swatch.style.backgroundColor;
+  };
 
   private toggleTooltip = () => {
     this.showTooltip = !this.showTooltip;
@@ -98,7 +119,7 @@ export class App {
   public animate = () => {
     this.clearCanvas(this.brushContext);
 
-    this.brush?.update(this.mouse.x, this.mouse.y);
+    this.brush?.update(this.mouse.x, this.mouse.y, this.selectedColor);
     this.brush?.draw();
 
     requestAnimationFrame(this.animate);
@@ -168,6 +189,16 @@ export class App {
     this.drawCanvas.width = width;
     this.drawCanvas.height = height;
   }
+
+  private initSwatches = () => {
+    const colors = ["red", "orange", "yellow", "green", "blue", "violet"];
+    const swatches = colors.map((color) => DOMHelper.createSwatch(color));
+
+    const firstSwatch = swatches[0];
+    firstSwatch.classList.add("selected");
+    this.selectedColor = firstSwatch.style.backgroundColor;
+    this.swatches.append(...swatches);
+  };
 
   private getContext(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");

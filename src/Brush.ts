@@ -10,7 +10,7 @@ export class Brush {
   public y: number;
   public size: number;
   public isPressed: boolean;
-  public color: string = "white";
+  public color: string = "";
 
   constructor(ctx: CanvasRenderingContext2D, settings: BrushSettings) {
     this.ctx = ctx;
@@ -28,9 +28,10 @@ export class Brush {
     this.ctx.fill();
   }
 
-  update(x: number, y: number) {
+  update(x: number, y: number, color: string) {
     this.x = x;
     this.y = y;
+    this.color = color;
   }
 
   setIsPressed(isPressed: boolean) {
