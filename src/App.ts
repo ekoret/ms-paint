@@ -11,6 +11,7 @@ export class App {
 
   private brushSizeSlider: HTMLInputElement;
   private hideTooltipButton: HTMLButtonElement;
+  private clearButton: HTMLButtonElement;
 
   private canvasWrapper: HTMLDivElement;
 
@@ -31,6 +32,7 @@ export class App {
 
     this.canvasWrapper = DOMHelper.getEl<HTMLDivElement>(".canvas-wrapper");
 
+    this.clearButton = DOMHelper.getEl<HTMLButtonElement>("#clear");
     this.brushSizeSlider = DOMHelper.getEl<HTMLInputElement>("#brush-size");
     this.hideTooltipButton =
       DOMHelper.getEl<HTMLButtonElement>("#toggle-tooltip");
@@ -66,12 +68,17 @@ export class App {
     );
 
     // Handle changing brush state when holding
-    this.canvasWrapper.addEventListener("mousedown", () => {
-      this.brush?.setIsPressed(true);
-    });
-    this.canvasWrapper.addEventListener("mouseup", () => {
-      this.brush?.setIsPressed(false);
-    });
+    this.canvasWrapper.addEventListener("mousedown", () =>
+      this.brush?.setIsPressed(true)
+    );
+    this.canvasWrapper.addEventListener("mouseup", () =>
+      this.brush?.setIsPressed(false)
+    );
+
+    // Clearing canvas
+    this.clearButton.addEventListener("click", () =>
+      this.clearCanvas(this.drawContext)
+    );
   }
 
   private toggleTooltip = () => {
